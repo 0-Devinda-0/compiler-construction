@@ -69,10 +69,13 @@ float           {integer}{fraction}?([eE][+-]?{integer})?
 ":"           { return T_COLON; }
 "=>"          { return T_ARROW; }
 
+"//".* ;
 
 {integer}     { return T_INTLIT; }
 {float}       { return T_FLOATLIT; }
 {id}          { return T_ID; }
+
+
 
 [ \t\r]+      ;   // ignore whitespace
 \n            { yylineno++; }
