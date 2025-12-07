@@ -1,0 +1,120 @@
+Start Derivation:
+prog -> classOrImplOrFuncList
+classOrImplOrFuncList -> classOrImplOrFunc classOrImplOrFuncList
+classOrImplOrFunc -> classDecl
+classDecl -> class id classDeclOptIsa { classMembers } ;
+classDeclOptIsa -> epsilon
+classMembers -> classMember classMembers
+classMember -> visibility memberDecl
+visibility -> public
+memberDecl -> funcDecl
+funcDecl -> funcHead ;
+funcHead -> func id ( fParams ) => returnType
+fParams -> epsilon
+returnType -> type
+type -> integer
+classMembers -> classMember classMembers
+classMember -> visibility memberDecl
+visibility -> public
+memberDecl -> funcDecl
+funcDecl -> funcHead ;
+funcHead -> func id ( fParams ) => returnType
+fParams -> epsilon
+returnType -> type
+type -> float
+classMembers -> epsilon
+classOrImplOrFuncList -> classOrImplOrFunc classOrImplOrFuncList
+classOrImplOrFunc -> implDef
+implDef -> implement id { funcDefList }
+funcDefList -> funcDef funcDefList
+funcDef -> funcHead funcBody
+funcHead -> func id ( fParams ) => returnType
+fParams -> epsilon
+returnType -> type
+type -> integer
+funcBody -> { localVarDeclOrStmtList }
+localVarDeclOrStmtList -> localVarDeclOrStmt localVarDeclOrStmtList
+localVarDeclOrStmt -> localVarDecl
+localVarDecl -> local varDecl
+varDecl -> id : type arraySizeList ;
+type -> integer
+arraySizeList -> epsilon
+localVarDeclOrStmtList -> localVarDeclOrStmt localVarDeclOrStmtList
+localVarDeclOrStmt -> statement
+statement -> idOrSelfPrefix stmtAfterIdOrSelf
+variable -> idOrSelfPrefix variableTail
+indiceList -> epsilon
+assignOp -> :=
+expr -> relExpr
+relExpr -> arithExpr relExpr'
+arithExpr -> term arithExpr'
+term -> factor term'
+factor -> floatLit
+term' -> epsilon
+arithExpr' -> epsilon
+relExpr' -> epsilon
+localVarDeclOrStmtList -> localVarDeclOrStmt localVarDeclOrStmtList
+localVarDeclOrStmt -> statement
+statement -> idOrSelfPrefix stmtAfterIdOrSelf
+variable -> idOrSelfPrefix variableTail
+indiceList -> epsilon
+assignOp -> :=
+expr -> relExpr
+relExpr -> arithExpr relExpr'
+arithExpr -> term arithExpr'
+term -> factor term'
+factor -> intLit
+term' -> epsilon
+arithExpr' -> epsilon
+relExpr' -> epsilon
+localVarDeclOrStmtList -> localVarDeclOrStmt localVarDeclOrStmtList
+localVarDeclOrStmt -> statement
+statement -> if ( relExpr ) then statBlock else statBlock ;
+relExpr -> arithExpr relExpr'
+arithExpr -> term arithExpr'
+term -> factor term'
+factor -> idOrSelfPrefix factorAfterIdOrSelf
+variable -> idOrSelfPrefix variableTail
+indiceList -> epsilon
+factorAfterIdOrSelf -> variableTail
+term' -> epsilon
+arithExpr' -> epsilon
+relExpr' -> epsilon
+statBlock -> { statementList }
+statementList -> statement statementList
+statement -> write ( expr ) ;
+expr -> relExpr
+relExpr -> arithExpr relExpr'
+arithExpr -> term arithExpr'
+term -> factor term'
+factor -> intLit
+term' -> epsilon
+arithExpr' -> epsilon
+relExpr' -> epsilon
+statementList -> epsilon
+statBlock -> { statementList }
+statementList -> statement statementList
+statement -> write ( expr ) ;
+expr -> relExpr
+relExpr -> arithExpr relExpr'
+arithExpr -> term arithExpr'
+term -> factor term'
+factor -> intLit
+term' -> epsilon
+arithExpr' -> epsilon
+relExpr' -> epsilon
+statementList -> epsilon
+localVarDeclOrStmtList -> localVarDeclOrStmt localVarDeclOrStmtList
+localVarDeclOrStmt -> statement
+statement -> return ( expr ) ;
+expr -> relExpr
+relExpr -> arithExpr relExpr'
+arithExpr -> term arithExpr'
+term -> factor term'
+factor -> intLit
+term' -> epsilon
+arithExpr' -> epsilon
+relExpr' -> epsilon
+localVarDeclOrStmtList -> epsilon
+funcDefList -> epsilon
+classOrImplOrFuncList -> epsilon

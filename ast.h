@@ -3,10 +3,10 @@
 
 #include <string>
 #include <vector>
-#include <memory> // Used for unique_ptr in modern C++ for easier memory management
+#include <memory> 
 
 // --- Base Class ---
-// The base class for all nodes in the Abstract Syntax Tree.
+
 class AstNode {
 public:
     virtual ~AstNode() = default;
@@ -18,12 +18,13 @@ class VariableDeclarationNode;
 class IdentifierNode;
 
 // --- Expression Nodes ---
-// Expressions are parts of the code that evaluate to a value.
+
 
 class LiteralNode : public AstNode {
 public:
+    std::string literalType;
     double value;
-    LiteralNode(double val) : value(val) {}
+    LiteralNode(double val,const std::string& type) : value(val),literalType(type) {}
 };
 
 class IdentifierNode : public AstNode {
@@ -63,12 +64,12 @@ public:
 
 
 // --- Statement Nodes ---
-// Statements are actions or commands.
+
 
 class AssignmentNode : public AstNode {
 public:
-    AstNode* target; // The variable/location being assigned to
-    AstNode* value;  // The expression providing the value
+    AstNode* target; 
+    AstNode* value;  
     AssignmentNode(AstNode* t, AstNode* v) : target(t), value(v) {}
 };
 
@@ -76,7 +77,7 @@ class IfStatementNode : public AstNode {
 public:
     AstNode* condition;
     BlockNode* thenBranch;
-    BlockNode* elseBranch; // Can be nullptr if there's no else part
+    BlockNode* elseBranch; 
     IfStatementNode(AstNode* cond, BlockNode* thenB, BlockNode* elseB) : condition(cond), thenBranch(thenB), elseBranch(elseB) {}
 };
 
@@ -95,7 +96,7 @@ public:
 
 class ReturnStatementNode : public AstNode {
 public:
-    AstNode* expression; // Can be nullptr for a simple "return;"
+    AstNode* expression; 
     ReturnStatementNode(AstNode* expr) : expression(expr) {}
 };
 
@@ -107,7 +108,6 @@ public:
 
 
 // --- Declaration Nodes ---
-// Declarations introduce new names (variables, functions, classes) into the program.
 
 class VariableDeclarationNode : public AstNode {
 public:
@@ -121,7 +121,7 @@ class FunctionDefinitionNode : public AstNode {
 public:
     std::string name;
     std::vector<VariableDeclarationNode*> parameters;
-    std::string returnTypeName; // Use "void" for procedures
+    std::string returnTypeName; 
     BlockNode* body;
     bool isConstructor;
     FunctionDefinitionNode(const std::string& n, const std::vector<VariableDeclarationNode*>& params, const std::string& retType, BlockNode* b, bool isCtor = false)
@@ -132,20 +132,20 @@ class ClassDeclarationNode : public AstNode {
 public:
     std::string name;
     std::vector<IdentifierNode*> superclasses;
-    std::vector<AstNode*> members; // A list of VariableDeclarationNode and FunctionDefinitionNode
+    std::vector<AstNode*> members; 
     ClassDeclarationNode(const std::string& n, const std::vector<IdentifierNode*>& supers, const std::vector<AstNode*>& mems)
         : name(n), superclasses(supers), members(mems) {}
 };
 
 
 // --- Root Node ---
-// The ProgramNode is the root of the entire AST.
+
 
 class ProgramNode : public AstNode {
 public:
-    std::vector<AstNode*> declarations; // A list of ClassDeclarationNode and FunctionDefinitionNode
+    std::vector<AstNode*> declarations; 
     ProgramNode(const std::vector<AstNode*>& decls) : declarations(decls) {}
 };
 
 
-#endif // AST_H
+#endif 
