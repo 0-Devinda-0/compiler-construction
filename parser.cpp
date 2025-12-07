@@ -1,6 +1,7 @@
 #include <bits/stdc++.h>
 #include "tokens.h"
 #include "ast.h" // <-- ADDED
+#include "SemanticAnalyzer.h"
 using namespace std;
 
 // global derivation file
@@ -608,12 +609,12 @@ AstNode* factor(){
   AstNode* node = nullptr;
  if(lookahead.type==T_INTLIT){ 
     note("factor -> intLit");
-    node = new LiteralNode(std::stod(lookahead.lexeme)); 
+    node = new LiteralNode(std::stod(lookahead.lexeme), "integer"); 
     expect(T_INTLIT); 
   }
  else if(lookahead.type==T_FLOATLIT){ 
     note("factor -> floatLit"); 
-    node = new LiteralNode(std::stod(lookahead.lexeme));
+    node = new LiteralNode(std::stod(lookahead.lexeme), "float");
     expect(T_FLOATLIT); 
   }
  else if(lookahead.type==T_LPAREN){ 
@@ -635,19 +636,19 @@ AstNode* factor(){
   }
  else if(lookahead.type==T_ID||lookahead.type==T_SELF){ 
     note("factor -> idOrSelfPrefix factorAfterIdOrSelf");
-    // NEW LOGIC: This is a variable or function call
-    node = variable(); // Parse the base (e.g., self.width)
+  
+    node = variable();
     if (lookahead.type == T_LPAREN) {
-        // It's a function call, e.g. self.myFunc()
+       
         note("factorAfterIdOrSelf -> ( aParams )");
         expect(T_LPAREN);
         std::vector<AstNode*> args = aParams();
         expect(T_RPAREN);
         node = new FunctionCallNode(node, args);
     } else {
-        // It's just a variable
+       
         note("factorAfterIdOrSelf -> variableTail");
-        // variable() already handled this
+        
     }
   }
  else { fprintf(stderr,"factor: unexpected %s\n", tokenName(lookahead.type)); exit(1); }
@@ -660,11 +661,11 @@ AstNode* sign(){
     } else { 
         fprintf(stderr,"sign expected\n"); exit(1);
     } 
-    return nullptr; // Not used
+    return nullptr;  
 }
 
 
-/* variable and indices */
+
 AstNode* variable(){ 
     note("variable -> idOrSelfPrefix variableTail");
     
@@ -679,7 +680,7 @@ AstNode* variable(){
         fprintf(stderr, "Expected id or self in variable\n"); exit(1);
     }
     
-    // Now parse the "tail" (e.g., .width, [i])
+    
     return parseVariableAccess(base);
 }
 
@@ -688,18 +689,17 @@ AstNode* parseVariableAccess(AstNode* base) {
         note("indiceList -> indice indiceList");
         AstNode* indexExpr = indice();
         AstNode* accessNode = new ArrayAccessNode(base, indexExpr);
-        return parseVariableAccess(accessNode); // Handle multi-dimensional arrays
+        return parseVariableAccess(accessNode); 
     } else if (lookahead.type == T_DOT) {
-        // This is member access, e.g., self.width
-        // We'll represent this with a BinaryOpNode for simplicity
-        advance(); // Consume the '.'
+       
+        advance();
         AstNode* member = new IdentifierNode(lookahead.lexeme);
         expect(T_ID);
         AstNode* accessNode = new BinaryOpNode(".", base, member);
-        return parseVariableAccess(accessNode); // Handle chained access
+        return parseVariableAccess(accessNode); 
     } else {
         note("indiceList -> epsilon");
-        return base; // Epsilon case, just return the base
+        return base; 
     }
 }
 
@@ -711,7 +711,7 @@ AstNode* indice(){
     return expr;
 }
 
-/* aParams and fParams */
+
 std::vector<AstNode*> aParams(){ 
     std::vector<AstNode*> args;
     if(lookahead.type==T_LPAREN||lookahead.type==T_NOT||lookahead.type==T_PLUS||lookahead.type==T_MINUS||lookahead.type==T_INTLIT||lookahead.type==T_FLOATLIT||lookahead.type==T_ID||lookahead.type==T_SELF){ 
@@ -720,7 +720,7 @@ std::vector<AstNode*> aParams(){
         return aParamsTailOpt(args); 
     } else {
         note("aParams -> epsilon");
-        return args; // Return empty vector
+        return args; 
     }
 }
 
@@ -744,7 +744,7 @@ std::vector<VariableDeclarationNode*> fParams(){
         return fParamsTailOpt(params); 
     } else {
         note("fParams -> epsilon");
-        return params; // Return empty vector
+        return params; 
     }
 }
 
@@ -770,42 +770,59 @@ std::vector<VariableDeclarationNode*> fParamsTailOpt(std::vector<VariableDeclara
     }
 }
 
-// --- main ---
+
+
 int main(int argc, char** argv){
  if(argc<2){ fprintf(stderr, "usage: %s <source-file>\n", argv[0]); return 1; }
- // open source file
+
  FILE* src = fopen(argv[1], "r");
  if(!src){ perror("fopen"); return 1; }
- // let flex know to read from this file
+
  extern FILE* yyin;
  yyin = src;
 
  DERIV = fopen("derivation.txt","w");
  if(!DERIV){ perror("deriv open"); return 1; }
 
- advance();       // load first token
+ advance();      
  note("Start Derivation:");
  
-  // --- MODIFIED MAIN LOGIC ---
-  AstNode* astRoot = prog(); // Parse and get the root of the AST
+ 
+  AstNode* astRoot = prog(); 
  
   if(lookahead.type != T_EOF){
   fprintf(stderr,"Extra input after program: %s\n", lookahead.lexeme.c_str());
+    fclose(DERIV);
+    fclose(src);
   return 1;
   }
   
-  if (astRoot != nullptr) {
-      printf("OK: syntax correct. AST created. Derivation written to derivation.txt\n");
-      // In a real compiler, you would now pass astRoot to the semantic analyzer
-      // e.g., semanticAnalysis(astRoot);
-      // You also need to delete the AST to prevent memory leaks
-      // e.g., delete astRoot; (This requires a recursive deletion)
-  } else {
-      fprintf(stderr, "AST creation failed.\n");
+  if (astRoot == nullptr) {
+      fprintf(stderr, "Syntax Error: AST creation failed.\n");
+      fclose(DERIV);
+      fclose(src);
       return 1;
   }
+
+  printf("OK: syntax correct. AST created. Derivation written to derivation.txt\n");
+  
+  
+  printf("Running semantic analysis...\n");
+  SemanticAnalyzer analyzer;
+  bool semanticOK = analyzer.analyze(astRoot);
+
+  if (semanticOK) {
+      printf("OK: Semantic analysis passed.\n");
+  } else {
+      fprintf(stderr, "FAIL: Semantic errors detected.\n");
+      
+  }
+
+  // --- CLEANUP ---
+  //TODO:  delete the AST to prevent memory leaks
+  
   
  fclose(DERIV);
  fclose(src);
- return 0;
+ return (semanticOK ? 0 : 1); 
 }
