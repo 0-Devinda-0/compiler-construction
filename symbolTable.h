@@ -10,7 +10,8 @@
 struct SymbolEntry {
     std::string name;             
     std::string type;             
-    std::string kind;             
+    std::string kind;
+    int offset; // the memory offset             
     AstNode* declarationNode; 
     
     

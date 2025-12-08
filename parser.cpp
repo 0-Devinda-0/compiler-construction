@@ -1,7 +1,8 @@
 #include <bits/stdc++.h>
 #include "tokens.h"
-#include "ast.h" // <-- ADDED
+#include "ast.h"
 #include "SemanticAnalyzer.h"
+#include "codeGen.h"
 using namespace std;
 
 // global derivation file
@@ -809,15 +810,26 @@ int main(int argc, char** argv){
   
   printf("Running semantic analysis...\n");
   SemanticAnalyzer analyzer;
-  bool semanticOK = analyzer.analyze(astRoot);
+//   bool semanticOK = analyzer.analyze(astRoot);
 
-  if (semanticOK) {
-      printf("OK: Semantic analysis passed.\n");
-  } else {
-      fprintf(stderr, "FAIL: Semantic errors detected.\n");
-      
-  }
+ if (analyzer.analyze(astRoot)) {
+        printf("2. Semantic Analysis: Passed.\n");
+        
+        // 4. Code Generation
+        // We pass the SymbolTable from the analyzer because it has the offsets!
+        CodeGen generator(analyzer.getTable()); 
+        
+        if (generator.generate(astRoot, "out.s")) {
+            printf("3. Code Generation: Passed. Assembly written to 'out.s'.\n");
+        } else {
+            fprintf(stderr, "Code Generation Failed: Could not open output file.\n");
+            return 1;
+        }
 
+    } else {
+        fprintf(stderr, "Semantic Analysis Failed.\n");
+        return 1;
+    }
   // --- CLEANUP ---
   //TODO:  delete the AST to prevent memory leaks
   

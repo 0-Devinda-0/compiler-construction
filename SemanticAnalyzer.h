@@ -18,6 +18,7 @@ private:
     SymbolTable table; // The symbol table
     bool hasError;     // Flag to track if any errors occurred
 
+    int currentLocalOffset; // Tracks the stack offset for local variables
     // --- Private Helper Functions ---
 
     /**
@@ -44,14 +45,14 @@ private:
     void checkWhile(WhileStatementNode* node);
     void checkWrite(WriteStatementNode* node);
     void checkReturn(ReturnStatementNode* node);
-    void checkFunctionCallStatement(FunctionCallNode* node); // e.g., myFunc();
+    void checkFunctionCallStatement(FunctionCallNode* node); 
 
     // --- Expression Type-Getters (return std::string) ---
     std::string getLiteralType(LiteralNode* node);
     std::string getIdentifierType(IdentifierNode* node);
     std::string getBinaryOpType(BinaryOpNode* node);
     std::string getUnaryOpType(UnaryOpNode* node);
-    std::string getFunctionCallType(FunctionCallNode* node); // e.g., x := myFunc();
+    std::string getFunctionCallType(FunctionCallNode* node); 
     std::string getArrayAccessType(ArrayAccessNode* node);
 
     // --- Utility ---

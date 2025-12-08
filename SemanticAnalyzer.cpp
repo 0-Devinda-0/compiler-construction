@@ -97,9 +97,21 @@ void SemanticAnalyzer::checkFunctionDefinition(FunctionDefinitionNode* node) {
     }
     
     table.enterScope();
+
+    currentLocalOffset = -8; 
+    int paramOffset = 16;
     
     for (VariableDeclarationNode* param : node->parameters) {
-        checkVariableDeclaration(param); 
+        // checkVariableDeclaration(param); 
+        SymbolEntry entry;
+        entry.name = param->name;
+        entry.type = param->typeName;
+        entry.kind = "parameter";
+        entry.declarationNode = param;
+        entry.offset = paramOffset; 
+        
+        table.insert(entry);
+        paramOffset += 8;
     }
     
    
@@ -117,6 +129,9 @@ void SemanticAnalyzer::checkVariableDeclaration(VariableDeclarationNode* node) {
     entry.kind = "variable";
     entry.declarationNode = node;
     
+    entry.offset = currentLocalOffset;
+    currentLocalOffset -= 8;
+
     if (!table.insert(entry)) {
         reportError("Redeclaration of variable '" + node->name + "'");
     }
